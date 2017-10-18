@@ -23,6 +23,13 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * modifications --
+ * Copyright (c) 2017 Synopsys, Inc. All rights reserved worldwide.
+ *
+ * This derivative work is subject to the original copyright provisions.
+ * In addition, this copyright notice must appear in copied source.
+ */
 
 #if 0
 __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bsdiff/bsdiff.c,v 1.1 2005/08/06 01:59:05 cperciva Exp $");
@@ -31,12 +38,26 @@ __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bsdiff/bsdiff.c,v 1.1 2005/08/06 01:59:05
 #include <sys/types.h>
 
 #include <bzlib.h>
+#ifndef COVERITY
 #include <err.h>
+#else
+#include "err-stub.h"
+#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#ifdef __clang__
+typedef unsigned char u_char;
+#endif
+
+#if defined(COVERITY) && (defined(_WIN32) || defined(__CYGWIN__))
+#define READ_MODE (O_RDONLY|O_BINARY)
+#else
+#define READ_MODE O_RDONLY
+#endif
 
 #define MIN(x,y) (((x)<(y)) ? (x) : (y))
 
@@ -213,11 +234,15 @@ int main(int argc,char *argv[])
 	BZFILE * pfbz2;
 	int bz2err;
 
+#ifdef COVERITY
+    err_set_prgn(argv[0]);
+#endif
+
 	if(argc!=4) errx(1,"usage: %s oldfile newfile patchfile\n",argv[0]);
 
 	/* Allocate oldsize+1 bytes instead of oldsize bytes to ensure
 		that we never try to malloc(0) and get a NULL pointer */
-	if(((fd=open(argv[1],O_RDONLY,0))<0) ||
+	if(((fd=open(argv[1],READ_MODE,0))<0) ||
 		((oldsize=lseek(fd,0,SEEK_END))==-1) ||
 		((old=malloc(oldsize+1))==NULL) ||
 		(lseek(fd,0,SEEK_SET)!=0) ||
@@ -233,7 +258,7 @@ int main(int argc,char *argv[])
 
 	/* Allocate newsize+1 bytes instead of newsize bytes to ensure
 		that we never try to malloc(0) and get a NULL pointer */
-	if(((fd=open(argv[2],O_RDONLY,0))<0) ||
+	if(((fd=open(argv[2],READ_MODE,0))<0) ||
 		((newsize=lseek(fd,0,SEEK_END))==-1) ||
 		((new=malloc(newsize+1))==NULL) ||
 		(lseek(fd,0,SEEK_SET)!=0) ||
@@ -246,7 +271,7 @@ int main(int argc,char *argv[])
 	eblen=0;
 
 	/* Create the patch file */
-	if ((pf = fopen(argv[3], "w")) == NULL)
+	if ((pf = fopen(argv[3], "wb")) == NULL)
 		err(1, "%s", argv[3]);
 
 	/* Header is

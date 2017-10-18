@@ -1,15 +1,38 @@
-CFLAGS		+=	-O3 -lbz2
+CC:=gcc
+CFLAGS:=
+LDFLAGS:=
+PREFIX:=/usr/local
+INSTALL:=(cp $1 $2 && chmod $3 $2/$1)
 
-PREFIX		?=	/usr/local
-INSTALL_PROGRAM	?=	${INSTALL} -c -s -m 555
-INSTALL_MAN	?=	${INSTALL} -c -m 444
+EXTRA_CFLAGS:=-DCOVERITY
+LDOBJS:=-lbz2
 
-all:		bsdiff bspatch
-bsdiff:		bsdiff.c
-bspatch:	bspatch.c
+all:		bsdiff bspatch test
+
+bsdiff:		bsdiff.o err-stub.o
+	$(CC) -o $@ $^ $(LDFLAGS) $(LDOBJS)
+
+bspatch:	bspatch.o err-stub.o
+	$(CC) -o $@ $^ $(LDFLAGS) $(LDOBJS)
+
+.c.o:
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c -o $@ $<
 
 install:
-	${INSTALL_PROGRAM} bsdiff bspatch ${PREFIX}/bin
-.ifndef WITHOUT_MAN
-	${INSTALL_MAN} bsdiff.1 bspatch.1 ${PREFIX}/man/man1
-.endif
+	mkdir -p $(PREFIX)/bin
+	$(call INSTALL,bsdiff,$(PREFIX)/bin,555)
+	$(call INSTALL,bspatch,$(PREFIX)/bin,555)
+ifndef WITHOUT_MAN
+	$(call INSTALL,bsdiff.1,$(PREFIX)/man/man1,444)
+	$(call INSTALL,bspatch.1,$(PREFIX)/man/man1,444)
+endif
+
+test: bsdiff bspatch
+	bsdiff bsdiff bspatch patch
+	bspatch bsdiff bspatch.2 patch
+	diff bspatch bspatch.2
+	rm patch bspatch.2
+
+clean:
+	-rm *.o bsdiff bspatch patch bspatch.2
+

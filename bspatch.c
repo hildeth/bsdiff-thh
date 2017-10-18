@@ -23,6 +23,13 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * modifications --
+ * Copyright (c) 2017 Synopsys, Inc. All rights reserved worldwide.
+ *
+ * This derivative work is subject to the original copyright provisions.
+ * In addition, this copyright notice must appear in copied source.
+ */
 
 #if 0
 __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bspatch/bspatch.c,v 1.1 2005/08/06 01:59:06 cperciva Exp $");
@@ -32,9 +39,25 @@ __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bspatch/bspatch.c,v 1.1 2005/08/06 01:59:
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef COVERITY
 #include <err.h>
+#else
+#include "err-stub.h"
+#endif
 #include <unistd.h>
 #include <fcntl.h>
+
+#ifdef __clang__
+typedef unsigned char u_char;
+#endif
+
+#if defined(COVERITY) && (defined(_WIN32) || defined(__CYGWIN__))
+#define READ_MODE (O_RDONLY|O_BINARY) 
+#define WRITE_MODE (O_CREAT|O_TRUNC|O_WRONLY|O_BINARY)
+#else
+#define READ_MODE O_RDONLY
+#define WRITE_MODE (O_CREAT|O_TRUNC|O_WRONLY)
+#endif
 
 static off_t offtin(u_char *buf)
 {
@@ -69,10 +92,14 @@ int main(int argc,char * argv[])
 	off_t lenread;
 	off_t i;
 
+#ifdef COVERITY
+    err_set_prgn(argv[0]);
+#endif
+
 	if(argc!=4) errx(1,"usage: %s oldfile newfile patchfile\n",argv[0]);
 
 	/* Open patch file */
-	if ((f = fopen(argv[3], "r")) == NULL)
+	if ((f = fopen(argv[3], "rb")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
 
 	/*
@@ -110,21 +137,21 @@ int main(int argc,char * argv[])
 	/* Close patch file and re-open it via libbzip2 at the right places */
 	if (fclose(f))
 		err(1, "fclose(%s)", argv[3]);
-	if ((cpf = fopen(argv[3], "r")) == NULL)
+	if ((cpf = fopen(argv[3], "rb")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
 	if (fseeko(cpf, 32, SEEK_SET))
 		err(1, "fseeko(%s, %lld)", argv[3],
 		    (long long)32);
 	if ((cpfbz2 = BZ2_bzReadOpen(&cbz2err, cpf, 0, 0, NULL, 0)) == NULL)
 		errx(1, "BZ2_bzReadOpen, bz2err = %d", cbz2err);
-	if ((dpf = fopen(argv[3], "r")) == NULL)
+	if ((dpf = fopen(argv[3], "rb")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
 	if (fseeko(dpf, 32 + bzctrllen, SEEK_SET))
 		err(1, "fseeko(%s, %lld)", argv[3],
 		    (long long)(32 + bzctrllen));
 	if ((dpfbz2 = BZ2_bzReadOpen(&dbz2err, dpf, 0, 0, NULL, 0)) == NULL)
 		errx(1, "BZ2_bzReadOpen, bz2err = %d", dbz2err);
-	if ((epf = fopen(argv[3], "r")) == NULL)
+	if ((epf = fopen(argv[3], "rb")) == NULL)
 		err(1, "fopen(%s)", argv[3]);
 	if (fseeko(epf, 32 + bzctrllen + bzdatalen, SEEK_SET))
 		err(1, "fseeko(%s, %lld)", argv[3],
@@ -132,7 +159,7 @@ int main(int argc,char * argv[])
 	if ((epfbz2 = BZ2_bzReadOpen(&ebz2err, epf, 0, 0, NULL, 0)) == NULL)
 		errx(1, "BZ2_bzReadOpen, bz2err = %d", ebz2err);
 
-	if(((fd=open(argv[1],O_RDONLY,0))<0) ||
+	if(((fd=open(argv[1],READ_MODE,0))<0) ||
 		((oldsize=lseek(fd,0,SEEK_END))==-1) ||
 		((old=malloc(oldsize+1))==NULL) ||
 		(lseek(fd,0,SEEK_SET)!=0) ||
@@ -193,7 +220,7 @@ int main(int argc,char * argv[])
 		err(1, "fclose(%s)", argv[3]);
 
 	/* Write the new file */
-	if(((fd=open(argv[2],O_CREAT|O_TRUNC|O_WRONLY,0666))<0) ||
+	if(((fd=open(argv[2],WRITE_MODE,0666))<0) ||
 		(write(fd,new,newsize)!=newsize) || (close(fd)==-1))
 		err(1,"%s",argv[2]);
 
