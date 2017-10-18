@@ -10,7 +10,7 @@
 
 #include <stdio.h> // vfprintf, stderr
 #include <stdarg.h> // va_list, etc.
-#include <string.h> // strerror
+#include <string.h> // strerror, strrchr
 #include <errno.h>
 #include <stdlib.h> // exit
 
@@ -30,6 +30,7 @@ void err(int eval, const char* fmt, ...)
         va_list ap;
         va_start(ap, fmt);
         vfprintf(stderr, fmt, ap);
+        fprintf(stderr, ": ");
     }
     fprintf(stderr, "%s\n", strerror(errno));
     exit(eval);
@@ -43,6 +44,7 @@ void errx(int eval, const char* fmt, ...)
         va_list ap;
         va_start(ap, fmt);
         vfprintf(stderr, fmt, ap);
+        fprintf(stderr, ": ");
     }
     exit(eval);
 }
