@@ -77,6 +77,15 @@ static off_t offtin(u_char *buf)
 	return y;
 }
 
+static int get_mode(const char* filename)
+{
+    struct stat status;
+    if (stat(filename, &status)) {
+        return -1; // failure
+    }
+    return status.st_mode;
+}
+
 int main(int argc,char * argv[])
 {
 	FILE * f, * cpf, * dpf, * epf;
@@ -219,8 +228,14 @@ int main(int argc,char * argv[])
 	if (fclose(cpf) || fclose(dpf) || fclose(epf))
 		err(1, "fclose(%s)", argv[3]);
 
+    // Copy permissions from old file to new.
+    int mode = get_mode(argv[1]);
+    if (mode < 0) {
+        err(1,"%s",argv[1]);
+    }
+
 	/* Write the new file */
-	if(((fd=open(argv[2],WRITE_MODE,0666))<0) ||
+	if(((fd=open(argv[2],WRITE_MODE, mode))<0) ||
 		(write(fd,new,newsize)!=newsize) || (close(fd)==-1))
 		err(1,"%s",argv[2]);
 

@@ -2,10 +2,15 @@ CC:=gcc
 CFLAGS:=
 LDFLAGS:=
 PREFIX:=/usr/local
-INSTALL:=(cp $1 $2 && chmod $3 $2/$1)
+INSTALL=(cp $1 $2 && chmod $3 $2/$1)
 
 EXTRA_CFLAGS:=-DCOVERITY
 LDOBJS:=-lbz2
+ifneq ($(filter mingw mingw64,$(PLATFORM)),)
+EXE:=.exe
+else
+EXE:=
+endif
 
 all:		bsdiff bspatch test
 
@@ -28,11 +33,14 @@ ifndef WITHOUT_MAN
 endif
 
 test: bsdiff bspatch
-	bsdiff bsdiff bspatch patch
-	bspatch bsdiff bspatch.2 patch
-	diff bspatch bspatch.2
-	rm patch bspatch.2
+	./bsdiff bsdiff$(EXE) bspatch$(EXE) patch
+	./bspatch bsdiff$(EXE) bspatch.2$(EXE) patch
+	diff bspatch$(EXE) bspatch.2$(EXE)
+	stat -c%a bspatch > bspatch.stat
+	stat -c%a bspatch.2 > bspatch.2.stat
+	diff bspatch.stat bspatch.2.stat
+	rm patch bspatch.2$(EXE) *.stat
 
 clean:
-	-rm *.o bsdiff bspatch patch bspatch.2
+	-rm *.o bsdiff bspatch patch bspatch.2$(EXE) *.stat
 
