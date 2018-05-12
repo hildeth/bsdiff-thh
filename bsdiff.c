@@ -1,3 +1,8 @@
+// Copyright (C) 2018 Synopsys, Inc. All rights reserved worldwide.
+// 
+// This file is part of bsdiff-thh, a branch of bsdiff.
+// It is distributed by permission of the original author, but without endorsement.
+// The Synopsys copyright reaffirms the original author''s copyright, included here verbatim:
 /*-
  * Copyright 2003-2005 Colin Percival
  * All rights reserved
@@ -23,26 +28,12 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-/**
- * modifications --
- * Copyright (c) 2017 Synopsys, Inc. All rights reserved worldwide.
- *
- * This derivative work is subject to the original copyright provisions.
- * In addition, this copyright notice must appear in copied source.
- */
 
-#if 0
-__FBSDID("$FreeBSD: src/usr.bin/bsdiff/bsdiff/bsdiff.c,v 1.1 2005/08/06 01:59:05 cperciva Exp $");
-#endif
+
+#include "err-stub.h"
 
 #include <sys/types.h>
-
 #include <bzlib.h>
-#ifndef COVERITY
-#include <err.h>
-#else
-#include "err-stub.h"
-#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,7 +44,7 @@ __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bsdiff/bsdiff.c,v 1.1 2005/08/06 01:59:05
 typedef unsigned char u_char;
 #endif
 
-#if defined(COVERITY) && (defined(_WIN32) || defined(__CYGWIN__))
+#if defined(_WIN32) || defined(__CYGWIN__)
 #define READ_MODE (O_RDONLY|O_BINARY)
 #else
 #define READ_MODE O_RDONLY
@@ -234,9 +225,7 @@ int main(int argc,char *argv[])
 	BZFILE * pfbz2;
 	int bz2err;
 
-#ifdef COVERITY
     err_set_prgn(argv[0]);
-#endif
 
 	if(argc!=4) errx(1,"usage: %s oldfile newfile patchfile\n",argv[0]);
 
