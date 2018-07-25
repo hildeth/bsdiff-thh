@@ -18,7 +18,7 @@ Refer to LICENSE.md for copyright permission information.
 Changes
 -------
 bsdiff-thh is currently hosted on github.com as an open-source project. The git changelog
-can be perused for the complete commit history.
+can be perused for the complete commit history. See also CHANGES.md
 
 The original version is bsdiff-4.3 available at
   http://www.daemonology.net/bsdiff/bsdiff-4.3.tar.gz

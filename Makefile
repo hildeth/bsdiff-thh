@@ -67,6 +67,9 @@ test: bsdiff bspatch
 	diff bspatch.stat bspatch.2.stat
 	rm patch bspatch.2$(EXE) *.stat
 
+test-long-paths: bsdiff bspatch
+	cd test-long-paths && make
+
 clean:
 	-rm *.o bsdiff bspatch patch bspatch.2$(EXE) *.stat
 

@@ -1,0 +1,14 @@
+all: really-long-names
+
+really-long-names:
+	for f in `seq 1 25`; do \
+		mkdir new_folder$$f; cd new_folder$$f; \
+	done; \
+	echo Mississippi > file1; \
+	echo Mississauga > file2
+	../bsdiff new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/file1 new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/file2 new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/patch
+	rm new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/file2
+	../bspatch new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/file1 new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/file2 new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/patch
+	grep Mississauga new_folder1/new_folder2/new_folder3/new_folder4/new_folder5/new_folder6/new_folder7/new_folder8/new_folder9/new_folder10/new_folder11/new_folder12/new_folder13/new_folder14/new_folder15/new_folder16/new_folder17/new_folder18/new_folder19/new_folder20/new_folder21/new_folder22/new_folder23/new_folder24/new_folder25/file2
+	rm -rf new_folder1
+
